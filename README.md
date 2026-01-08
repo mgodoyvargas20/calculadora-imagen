@@ -31,6 +31,10 @@ cd calculadora-imagen
 
 2. Instalar las dependencias:
 ```bash
+pip install -r requirements.txt
+```
+O manualmente:
+```bash
 pip install Pillow
 ```
 
@@ -65,6 +69,7 @@ calculadora-imagen/
 ├── resta.png              # Imagen del botón de resta
 ├── multiplicacion.png     # Imagen del botón de multiplicación
 ├── division.png           # Imagen del botón de división
+├── requirements.txt       # Dependencias del proyecto
 └── README.md              # Este archivo
 ```
 
