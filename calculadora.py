@@ -161,15 +161,15 @@ class CalculadoraImagen:
         """Calcula el resultado de la expresión de forma segura"""
         try:
             # Validar que solo contenga caracteres permitidos
+            # Nota: parentheses y espacios están permitidos para futuras extensiones,
+            # aunque actualmente no hay botones para ingresarlos en la UI
             expresion_segura = self.expresion.strip()
             caracteres_permitidos = set('0123456789+-*/(). ')
             
             if not expresion_segura or not all(c in caracteres_permitidos for c in expresion_segura):
                 raise ValueError("Expresión inválida")
             
-            # Usar ast para evaluar de forma segura
-            # ast.literal_eval no funciona para expresiones matemáticas, 
-            # pero podemos usar eval con un entorno restringido
+            # Evaluar usando AST (Abstract Syntax Tree) para seguridad
             resultado = self._evaluar_expresion_segura(expresion_segura)
             self.entrada_texto.set(str(resultado))
             self.expresion = str(resultado)
