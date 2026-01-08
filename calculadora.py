@@ -4,9 +4,7 @@ Calculadora Gráfica con Imágenes
 Usa tkinter para crear una interfaz gráfica con operaciones básicas representadas por imágenes
 """
 import tkinter as tk
-from tkinter import ttk
 from PIL import Image, ImageTk
-import os
 import ast
 import operator
 
@@ -126,14 +124,14 @@ class CalculadoraImagen:
         }
         
         for operacion, archivo in operaciones.items():
-                try:
-                    img = Image.open(archivo)
-                    img = img.resize((60, 60), Image.Resampling.LANCZOS)
-                    imagenes[operacion] = ImageTk.PhotoImage(img)
-                except (FileNotFoundError, OSError) as e:
-                    print(f"Error cargando {archivo}: {e}")
-                    # Crear una imagen por defecto si falla
-                    imagenes[operacion] = None
+            try:
+                img = Image.open(archivo)
+                img = img.resize((60, 60), Image.Resampling.LANCZOS)
+                imagenes[operacion] = ImageTk.PhotoImage(img)
+            except (FileNotFoundError, OSError) as e:
+                print(f"Error cargando {archivo}: {e}")
+                # Crear una imagen por defecto si falla
+                imagenes[operacion] = None
         
         return imagenes
     
@@ -191,7 +189,9 @@ class CalculadoraImagen:
         }
         
         def evaluar_nodo(nodo):
-            if isinstance(nodo, ast.Num):  # Número
+            if isinstance(nodo, ast.Constant):  # Número (Python 3.8+)
+                return nodo.value
+            elif isinstance(nodo, ast.Num):  # Número (compatibilidad con Python 3.7 y anterior)
                 return nodo.n
             elif isinstance(nodo, ast.BinOp):  # Operación binaria
                 op_func = operadores_permitidos.get(type(nodo.op))
