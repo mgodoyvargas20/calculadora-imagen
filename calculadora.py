@@ -160,10 +160,19 @@ class CalculadoraImagen:
     def calcular(self):
         """Calcula el resultado de la expresión"""
         try:
-            resultado = str(eval(self.expresion))
+            # Usar eval de forma segura, validando que solo contenga operadores permitidos
+            # Solo permite números, operadores matemáticos básicos y espacios
+            expresion_segura = self.expresion.strip()
+            caracteres_permitidos = set('0123456789+-*/(). ')
+            
+            if not expresion_segura or not all(c in caracteres_permitidos for c in expresion_segura):
+                raise ValueError("Expresión inválida")
+            
+            # Evaluar la expresión matemática
+            resultado = str(eval(expresion_segura))
             self.entrada_texto.set(resultado)
             self.expresion = resultado
-        except:
+        except (ValueError, ZeroDivisionError, SyntaxError, NameError) as e:
             self.entrada_texto.set("Error")
             self.expresion = ""
 

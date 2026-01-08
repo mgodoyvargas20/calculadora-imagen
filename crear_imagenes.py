@@ -11,7 +11,7 @@ def crear_imagen_operacion(texto, nombre_archivo, color_fondo=(255, 200, 100)):
     # Intentar usar una fuente grande, si no está disponible usar la predeterminada
     try:
         font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 40)
-    except:
+    except (OSError, IOError) as e:
         font = ImageFont.load_default()
     
     # Calcular posición para centrar el texto
