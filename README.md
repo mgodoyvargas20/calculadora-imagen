@@ -63,6 +63,7 @@ python3 calculadora.py
 
 ```
 calculadora-imagen/
+├── .gitignore             # Archivos a excluir del control de versiones
 ├── calculadora.py          # Aplicación principal de la calculadora
 ├── crear_imagenes.py       # Script para generar las imágenes de operaciones
 ├── suma.png               # Imagen del botón de suma

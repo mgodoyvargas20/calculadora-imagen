@@ -7,6 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import os
+import ast
+import operator
 
 class CalculadoraImagen:
     def __init__(self, root):
@@ -124,14 +126,14 @@ class CalculadoraImagen:
         }
         
         for operacion, archivo in operaciones.items():
-            try:
-                img = Image.open(archivo)
-                img = img.resize((60, 60), Image.Resampling.LANCZOS)
-                imagenes[operacion] = ImageTk.PhotoImage(img)
-            except Exception as e:
-                print(f"Error cargando {archivo}: {e}")
-                # Crear una imagen por defecto si falla
-                imagenes[operacion] = None
+                try:
+                    img = Image.open(archivo)
+                    img = img.resize((60, 60), Image.Resampling.LANCZOS)
+                    imagenes[operacion] = ImageTk.PhotoImage(img)
+                except (FileNotFoundError, OSError) as e:
+                    print(f"Error cargando {archivo}: {e}")
+                    # Crear una imagen por defecto si falla
+                    imagenes[operacion] = None
         
         return imagenes
     
@@ -158,23 +160,54 @@ class CalculadoraImagen:
         self.entrada_texto.set("")
     
     def calcular(self):
-        """Calcula el resultado de la expresión"""
+        """Calcula el resultado de la expresión de forma segura"""
         try:
-            # Usar eval de forma segura, validando que solo contenga operadores permitidos
-            # Solo permite números, operadores matemáticos básicos y espacios
+            # Validar que solo contenga caracteres permitidos
             expresion_segura = self.expresion.strip()
             caracteres_permitidos = set('0123456789+-*/(). ')
             
             if not expresion_segura or not all(c in caracteres_permitidos for c in expresion_segura):
                 raise ValueError("Expresión inválida")
             
-            # Evaluar la expresión matemática
-            resultado = str(eval(expresion_segura))
-            self.entrada_texto.set(resultado)
-            self.expresion = resultado
-        except (ValueError, ZeroDivisionError, SyntaxError, NameError) as e:
+            # Usar ast para evaluar de forma segura
+            # ast.literal_eval no funciona para expresiones matemáticas, 
+            # pero podemos usar eval con un entorno restringido
+            resultado = self._evaluar_expresion_segura(expresion_segura)
+            self.entrada_texto.set(str(resultado))
+            self.expresion = str(resultado)
+        except (ValueError, ZeroDivisionError, SyntaxError, NameError, TypeError) as e:
             self.entrada_texto.set("Error")
             self.expresion = ""
+    
+    def _evaluar_expresion_segura(self, expresion):
+        """Evalúa una expresión matemática de forma segura"""
+        # Permitir solo operaciones matemáticas básicas
+        operadores_permitidos = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.USub: operator.neg,
+        }
+        
+        def evaluar_nodo(nodo):
+            if isinstance(nodo, ast.Num):  # Número
+                return nodo.n
+            elif isinstance(nodo, ast.BinOp):  # Operación binaria
+                op_func = operadores_permitidos.get(type(nodo.op))
+                if op_func is None:
+                    raise ValueError("Operador no permitido")
+                return op_func(evaluar_nodo(nodo.left), evaluar_nodo(nodo.right))
+            elif isinstance(nodo, ast.UnaryOp):  # Operación unaria
+                op_func = operadores_permitidos.get(type(nodo.op))
+                if op_func is None:
+                    raise ValueError("Operador no permitido")
+                return op_func(evaluar_nodo(nodo.operand))
+            else:
+                raise ValueError("Tipo de nodo no permitido")
+        
+        arbol = ast.parse(expresion, mode='eval')
+        return evaluar_nodo(arbol.body)
 
 def main():
     root = tk.Tk()

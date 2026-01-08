@@ -8,10 +8,23 @@ def crear_imagen_operacion(texto, nombre_archivo, color_fondo=(255, 200, 100)):
     img = Image.new('RGB', (60, 60), color_fondo)
     draw = ImageDraw.Draw(img)
     
-    # Intentar usar una fuente grande, si no está disponible usar la predeterminada
-    try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 40)
-    except (OSError, IOError) as e:
+    # Intentar cargar una fuente grande de forma multiplataforma
+    font = None
+    rutas_fuentes = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+        "/System/Library/Fonts/Helvetica.ttc",  # macOS
+        "C:\\Windows\\Fonts\\arialbd.ttf",  # Windows
+    ]
+    
+    for ruta in rutas_fuentes:
+        try:
+            font = ImageFont.truetype(ruta, 40)
+            break
+        except (OSError, IOError):
+            continue
+    
+    # Si no se encuentra ninguna fuente, usar la predeterminada
+    if font is None:
         font = ImageFont.load_default()
     
     # Calcular posición para centrar el texto
